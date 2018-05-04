@@ -16,6 +16,39 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+function readFromFile(fileName, cb) {
+    var that = this;
+
+    var pathToFile = cordova.file.dataDirectory + fileName;
+    console.log("Path to file " + pathToFile);
+    //alert("Filename " + pathToFile);
+    window.resolveLocalFileSystemURL(pathToFile, function (fileEntry) {
+        fileEntry.file(function (file) {
+            var reader = new FileReader();
+
+            reader.onloadend = function (e) {
+                cb(JSON.parse(this.result));
+                alert("File inhoud " + this.result);
+            };
+
+            reader.readAsText(file);
+        }, function(error) {
+            console.log("error1");
+        });
+    }, function(error) {
+        console.log("error2")
+    });
+}
+
+ function onSubmit() {
+    var fileName = 'data.json';
+    var fileData;
+    this.readFromFile(fileName, function (data) {
+        fileData = data;
+    });
+}
+
 var app = {
     // Application Constructor
     initialize: function() {
@@ -48,10 +81,6 @@ var app = {
         var fileName = 'data.json';
         this.writeToFile(fileName, { foo: 'bar' });
 
-        var fileData;
-        this.readFromFile(fileName, function (data) {
-            fileData = data;
-        });
         
     },
 
@@ -140,25 +169,6 @@ var app = {
                     var blob = new Blob([data], { type: 'text/plain' });
                     fileWriter.write(blob);
                 }, that.errorHandler.bind(null, fileName));
-            }, that.errorHandler.bind(null, fileName));
-        }, that.errorHandler.bind(null, fileName));
-    },
-
-    readFromFile: function(fileName, cb) {
-        var that = this;
-
-        var pathToFile = cordova.file.dataDirectory + fileName;
-        console.log("Path to file " + pathToFile);
-        //alert("Filename " + pathToFile);
-        window.resolveLocalFileSystemURL(pathToFile, function (fileEntry) {
-            fileEntry.file(function (file) {
-                var reader = new FileReader();
-
-                reader.onloadend = function (e) {
-                    cb(JSON.parse(this.result));
-                };
-
-                reader.readAsText(file);
             }, that.errorHandler.bind(null, fileName));
         }, that.errorHandler.bind(null, fileName));
     },
