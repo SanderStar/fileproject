@@ -17,9 +17,11 @@
  * under the License.
  */
 
- // Busy:
+ // TODO - Busy:
  // externalRootDirectory not working in IOS
- // tempDirectory
+ // tempDirectory not working in Android
+ // What is the correct folder to store the data?
+ //
 function readFromFile(fileName, cb) {
     var that = this;
 
