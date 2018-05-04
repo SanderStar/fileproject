@@ -52,8 +52,9 @@ var app = {
     },
 
     writeToFile: function(fileName, data) {
+        alert("Write to file " + fileName);
         data = JSON.stringify(data, null, '\t');
-        window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function (directoryEntry) {
+     window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function (directoryEntry) {
             directoryEntry.getFile(fileName, { create: true }, function (fileEntry) {
                 fileEntry.createWriter(function (fileWriter) {
                     fileWriter.onwriteend = function (e) {
@@ -75,6 +76,7 @@ var app = {
 
     readFromFile: function(fileName, cb) {
         var pathToFile = cordova.file.dataDirectory + fileName;
+        alert("Filename " + pathToFile);
         window.resolveLocalFileSystemURL(pathToFile, function (fileEntry) {
             fileEntry.file(function (file) {
                 var reader = new FileReader();
