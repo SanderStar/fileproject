@@ -41,6 +41,9 @@ var app = {
 
         console.log('Received Event: ' + id);
 
+        this.writeDataToFile();
+
+        /*
         var fileName = 'data.json';
         this.writeToFile(fileName, { foo: 'bar' });
 
@@ -48,13 +51,78 @@ var app = {
         this.readFromFile(fileName, function (data) {
             fileData = data;
         });
+        */
         
     },
 
+    writeDataToFile: function() {
+        var that = this;
+        window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
+            console.log('file system open: ' + fs.name);
+            fs.root.getFile("newPersistentFile.txt", { create: true, exclusive: false }, function (fileEntry) {
+        
+                console.log("fileEntry is file?" + fileEntry.isFile.toString());
+                // fileEntry.name == 'someFile.txt'
+                // fileEntry.fullPath == '/someFile.txt'
+                that.writeFile(fileEntry, null);
+            }, function() {
+                console.log("error get file");
+            });
+        
+        }, function() {
+            console.log("error request file system");
+        });
+    },
+
+    readFile: function(fileEntry) {
+
+        fileEntry.file(function (file) {
+            var reader = new FileReader();
+    
+            reader.onloadend = function() {
+                console.log("Successful file read: " + this.result);
+                // TODO show data
+                console.log(fileEntry.fullPath + ": " + this.result);
+            };
+    
+            reader.readAsText(file);
+    
+        }, function() {
+            console.log("error opening file");
+        });
+    },
+
+    writeFile: function(fileEntry, dataObj) {
+        var that = this;
+        // Create a FileWriter object for our FileEntry (log.txt).
+        fileEntry.createWriter(function (fileWriter) {
+    
+            fileWriter.onwriteend = function() {
+                console.log("Successful file write...");
+                that.readFile(fileEntry);
+            };
+    
+            fileWriter.onerror = function (e) {
+                console.log("Failed file write: " + e.toString());
+            };
+    
+            // If data object is not passed in,
+            // create a new Blob instead.
+            if (!dataObj) {
+                dataObj = new Blob(['some file data'], { type: 'text/plain' });
+            }
+    
+            fileWriter.write(dataObj);
+        });
+    },
+
+
     writeToFile: function(fileName, data) {
-        alert("Write to file " + fileName);
+        //alert("Write to file " + fileName);
+        var that = this;
         data = JSON.stringify(data, null, '\t');
-     window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function (directoryEntry) {
+
+        window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function (directoryEntry) {
             directoryEntry.getFile(fileName, { create: true }, function (fileEntry) {
                 fileEntry.createWriter(function (fileWriter) {
                     fileWriter.onwriteend = function (e) {
@@ -69,14 +137,16 @@ var app = {
 
                     var blob = new Blob([data], { type: 'text/plain' });
                     fileWriter.write(blob);
-                }, this.errorHandler.bind(null, fileName));
-            }, this.errorHandler.bind(null, fileName));
-        }, this.errorHandler.bind(null, fileName));
+                }, that.errorHandler.bind(null, fileName));
+            }, that.errorHandler.bind(null, fileName));
+        }, that.errorHandler.bind(null, fileName));
     },
 
     readFromFile: function(fileName, cb) {
+        var that = this;
+
         var pathToFile = cordova.file.dataDirectory + fileName;
-        alert("Filename " + pathToFile);
+        //alert("Filename " + pathToFile);
         window.resolveLocalFileSystemURL(pathToFile, function (fileEntry) {
             fileEntry.file(function (file) {
                 var reader = new FileReader();
@@ -86,8 +156,8 @@ var app = {
                 };
 
                 reader.readAsText(file);
-            }, this.errorHandler.bind(null, fileName));
-        }, this.errorHandler.bind(null, fileName));
+            }, that.errorHandler.bind(null, fileName));
+        }, that.errorHandler.bind(null, fileName));
     },
 
     errorHandler: function (fileName, e) {  
