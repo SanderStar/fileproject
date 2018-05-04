@@ -43,7 +43,8 @@ var app = {
 
         this.writeDataToFile();
 
-        /*
+        // Android file path: file:///storage/emulated/0/data.json (su root)
+        // IOS file path: 
         var fileName = 'data.json';
         this.writeToFile(fileName, { foo: 'bar' });
 
@@ -51,7 +52,6 @@ var app = {
         this.readFromFile(fileName, function (data) {
             fileData = data;
         });
-        */
         
     },
 
@@ -65,12 +65,14 @@ var app = {
                 // fileEntry.name == 'someFile.txt'
                 // fileEntry.fullPath == '/someFile.txt'
                 that.writeFile(fileEntry, null);
-            }, function() {
+            }, function(error) {
                 console.log("error get file");
+                that.errorHandler(null, error);
             });
         
-        }, function() {
+        }, function(obj) {
             console.log("error request file system");
+            that.errorHandler(null, error);
         });
     },
 
@@ -122,7 +124,7 @@ var app = {
         var that = this;
         data = JSON.stringify(data, null, '\t');
 
-        window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function (directoryEntry) {
+        window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function (directoryEntry) {
             directoryEntry.getFile(fileName, { create: true }, function (fileEntry) {
                 fileEntry.createWriter(function (fileWriter) {
                     fileWriter.onwriteend = function (e) {
@@ -146,6 +148,8 @@ var app = {
         var that = this;
 
         var pathToFile = cordova.file.dataDirectory + fileName;
+        pathToFile = cordova.file.externalRootDirectory + fileName;
+        console.log("Path to file " + pathToFile);
         //alert("Filename " + pathToFile);
         window.resolveLocalFileSystemURL(pathToFile, function (fileEntry) {
             fileEntry.file(function (file) {
