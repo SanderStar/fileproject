@@ -21,6 +21,8 @@
  // externalRootDirectory not working in IOS
  // tempDirectory not working in Android
  // What is the correct folder to store the data?
+ // dataDirectory is private for the application. will not be okay.
+ // data must be available for other apps if chauffeur app fails
  //
 function readFromFile(fileName, cb) {
     var that = this;
