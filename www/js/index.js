@@ -126,11 +126,7 @@ var app = {
         var that = this;
         data = JSON.stringify(data, null, '\t');
 
-        var pathToFile = cordova.file.externalRootDirectory;
-        if (!pathToFile) {
-            // Fix for IOS
-            pathToFile = "/Users/sanderstar/";
-        }
+        var pathToFile = cordova.file.dataDirectory;
         window.resolveLocalFileSystemURL(pathToFile, function (directoryEntry) {
             directoryEntry.getFile(fileName, { create: true }, function (fileEntry) {
                 fileEntry.createWriter(function (fileWriter) {
@@ -156,13 +152,6 @@ var app = {
 
         // TODO fix path to file (use external root directory)
         var pathToFile = cordova.file.dataDirectory + fileName;
-        var pathToFile = cordova.file.externalRootDirectory;
-        if (!pathToFile) {
-            // Fix for IOS
-            pathToFile = "/Users/sanderstar/";
-        }
-        
-        pathToFile += fileName;
         console.log("Path to file " + pathToFile);
         //alert("Filename " + pathToFile);
         window.resolveLocalFileSystemURL(pathToFile, function (fileEntry) {
