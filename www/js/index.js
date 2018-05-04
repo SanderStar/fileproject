@@ -20,9 +20,10 @@
 function readFromFile(fileName, cb) {
     var that = this;
 
-    var pathToFile = cordova.file.dataDirectory + fileName;
+    var pathToFile = cordova.file.externalRootDirectory + fileName;
     console.log("Path to file " + pathToFile);
     //alert("Filename " + pathToFile);
+    // TODO examine how to configure path to file
     window.resolveLocalFileSystemURL(pathToFile, function (fileEntry) {
         fileEntry.file(function (file) {
             var reader = new FileReader();
@@ -84,6 +85,7 @@ var app = {
         
     },
 
+    // Path to file not customizable
     writeDataToFile: function() {
         var that = this;
         window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
@@ -105,6 +107,7 @@ var app = {
         });
     },
 
+    // Path to file not customizable
     readFile: function(fileEntry) {
 
         fileEntry.file(function (file) {
@@ -123,6 +126,7 @@ var app = {
         });
     },
 
+    // Path to file not customizable
     writeFile: function(fileEntry, dataObj) {
         var that = this;
         // Create a FileWriter object for our FileEntry (log.txt).
@@ -148,12 +152,14 @@ var app = {
     },
 
 
+    // TODO investigate how to set other then cordova.file.dataDirectory
     writeToFile: function(fileName, data) {
         //alert("Write to file " + fileName);
         var that = this;
         data = JSON.stringify(data, null, '\t');
 
-        window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function (directoryEntry) {
+        // TODO use externalRootDirectory 
+        window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function (directoryEntry) {
             directoryEntry.getFile(fileName, { create: true }, function (fileEntry) {
                 fileEntry.createWriter(function (fileWriter) {
                     fileWriter.onwriteend = function (e) {
