@@ -17,10 +17,20 @@
  * under the License.
  */
 
+ // Busy:
+ // externalRootDirectory not working in IOS
+ // tempDirectory
 function readFromFile(fileName, cb) {
     var that = this;
 
-    var pathToFile = cordova.file.externalRootDirectory + fileName;
+    var pathToFile;
+    if (cordova.file.tempDirectory) {
+        // IOS
+        pathToFile = cordova.file.tempDirectory + fileName;
+    } else {
+        // Android
+        pathToFile = cordova.file.externalRootDirectory + fileName;
+    }
     console.log("Path to file " + pathToFile);
     //alert("Filename " + pathToFile);
     // TODO examine how to configure path to file
@@ -158,8 +168,17 @@ var app = {
         var that = this;
         data = JSON.stringify(data, null, '\t');
 
+        var pathToFile;
+        if (cordova.file.tempDirectory) {
+            // IOS
+            pathToFile = cordova.file.tempDirectory;
+        } else {
+            // Android
+            pathToFile = cordova.file.externalRootDirectory;
+        }
+    
         // TODO use externalRootDirectory 
-        window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function (directoryEntry) {
+        window.resolveLocalFileSystemURL(pathToFile, function (directoryEntry) {
             directoryEntry.getFile(fileName, { create: true }, function (fileEntry) {
                 fileEntry.createWriter(function (fileWriter) {
                     fileWriter.onwriteend = function (e) {
