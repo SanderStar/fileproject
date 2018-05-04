@@ -55,6 +55,7 @@ var app = {
         
     },
 
+    // Niet mogelijk om data op specifieke folder / file structuren op te slaan
     writeDataToFile: function() {
         var that = this;
         window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
@@ -119,12 +120,18 @@ var app = {
     },
 
 
+    // Mogelijk om files op specifieke locaties op te slaan.
     writeToFile: function(fileName, data) {
         //alert("Write to file " + fileName);
         var that = this;
         data = JSON.stringify(data, null, '\t');
 
-        window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function (directoryEntry) {
+        var pathToFile = cordova.file.externalRootDirectory;
+        if (!pathToFile) {
+            // Fix for IOS
+            pathToFile = "/Users/sanderstar/";
+        }
+        window.resolveLocalFileSystemURL(pathToFile, function (directoryEntry) {
             directoryEntry.getFile(fileName, { create: true }, function (fileEntry) {
                 fileEntry.createWriter(function (fileWriter) {
                     fileWriter.onwriteend = function (e) {
@@ -147,8 +154,15 @@ var app = {
     readFromFile: function(fileName, cb) {
         var that = this;
 
+        // TODO fix path to file (use external root directory)
         var pathToFile = cordova.file.dataDirectory + fileName;
-        pathToFile = cordova.file.externalRootDirectory + fileName;
+        var pathToFile = cordova.file.externalRootDirectory;
+        if (!pathToFile) {
+            // Fix for IOS
+            pathToFile = "/Users/sanderstar/";
+        }
+        
+        pathToFile += fileName;
         console.log("Path to file " + pathToFile);
         //alert("Filename " + pathToFile);
         window.resolveLocalFileSystemURL(pathToFile, function (fileEntry) {
