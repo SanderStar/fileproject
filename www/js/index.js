@@ -124,7 +124,7 @@ var app = {
         var that = this;
         data = JSON.stringify(data, null, '\t');
 
-        window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function (directoryEntry) {
+       var pathToFile  =  window.resolveLocalFileSystemURL(, function (directoryEntry) {
             directoryEntry.getFile(fileName, { create: true }, function (fileEntry) {
                 fileEntry.createWriter(function (fileWriter) {
                     fileWriter.onwriteend = function (e) {
