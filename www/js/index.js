@@ -56,12 +56,58 @@ function readFromFile(fileName, cb) {
     });
 }
 
- function onSubmit() {
+ function onSubmit1() {
     var fileName = 'data.json';
     var fileData;
     this.readFromFile(fileName, function (data) {
         fileData = data;
     });
+}
+
+// Path to file not customizable
+function readDataToFile() {
+    var that = this;
+    window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
+        console.log('file system open: ' + fs.name);
+        fs.root.getFile("newPersistentFile.txt", { create: true, exclusive: false }, function (fileEntry) {
+    
+            console.log("fileEntry is file?" + fileEntry.isFile.toString());
+            // fileEntry.name == 'someFile.txt'
+            // fileEntry.fullPath == '/someFile.txt'
+            that.readFile(fileEntry, null);
+        }, function(error) {
+            console.log("error get file");
+            that.errorHandler(null, error);
+        });
+    
+    }, function(obj) {
+        console.log("error request file system");
+        that.errorHandler(null, error);
+    });
+}
+
+    // Path to file not customizable
+function  readFile(fileEntry) {
+
+    fileEntry.file(function (file) {
+        var reader = new FileReader();
+
+        reader.onloadend = function() {
+            console.log("Successful file read: " + this.result);
+            alert("filename: " + fileEntry.fullPath + " data in file: " + this.result);
+            // TODO show data
+            console.log(fileEntry.fullPath + ": " + this.result);
+        };
+
+        reader.readAsText(file);
+
+    }, function() {
+        console.log("error opening file");
+    });
+}
+
+function onSubmit2() {
+    this.readDataToFile();
 }
 
 var app = {
