@@ -43,8 +43,12 @@
             <div id="deviceready" class="blink">
                 <p class="event listening">Connecting to Device</p>
                 <p class="event received">Device is Ready</p>
-                <input type="submit" onclick="onSubmit1()" name="Submit1"/>
-                <input type="submit" onclick="onSubmit2()" name="Submit2"/>
+                <input type="submit" onclick="onSubmitCreateDir()" value="Create folder"/>
+                <input type="submit" onclick="onWriteFile1()" value="Write file (optie 1)"/>
+                <input type="submit" onclick="onReadFile1()" value="Read file (optie 1)"/>
+                <input type="submit" onclick="onDeleteFile1()" value="Delete file (optie 1)"/>
+                <input type="submit" onclick="onSubmitDeleteDir()" value="Delete folder"/>
+                <input type="submit" onclick="onSubmit2()" value="Read file (optie 2)"/>
             </div>
         </div>
         <script type="text/javascript" src="cordova.js"></script>

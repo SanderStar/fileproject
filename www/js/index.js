@@ -24,17 +24,106 @@
  // dataDirectory is private for the application. will not be okay.
  // data must be available for other apps if chauffeur app fails
  //
-function readFromFile(fileName, cb) {
-    var that = this;
 
+ function getPathToFile() {
     var pathToFile;
     if (cordova.file.tempDirectory) {
         // IOS
-        pathToFile = cordova.file.tempDirectory + fileName;
+        pathToFile = cordova.file.tempDirectory;
     } else {
         // Android
-        pathToFile = cordova.file.externalRootDirectory + fileName;
+        pathToFile = cordova.file.externalRootDirectory;
     }
+    return pathToFile;
+ }
+
+ function getDataDir() {
+     return "sanderstar";
+ }
+
+ function onSubmitCreateDir() {
+    var pathToFile = this.getPathToFile();
+
+    window.resolveLocalFileSystemURL(pathToFile, function (rootDirectoryEntry) {
+        rootDirectoryEntry.getDirectory(this.getDataDir(), { create: true }, function (dirEntry) {
+            alert("Directory created");
+        }, function(error) {
+            alert("Error " + error);
+        });
+    }, function(error) {
+        alert("Error " + error);
+    });
+ }
+
+ function onDeleteFile1() {
+    var pathToFile = this.getPathToFile() + this.getDataDir();
+
+    window.resolveLocalFileSystemURL(pathToFile, function (directoryEntry) {
+        var succes = function() {
+            alert("File remove success");
+        }
+        var fails = function(error) {
+            alert("File remove fails " + error);
+        }
+        directoryEntry.getFile(this.getFileName(), {create : false}, function(fileEntry) {
+            fileEntry.remove(succes, fails);
+        });
+    });
+ }
+
+ function onSubmitDeleteDir() {
+    var pathToFile = this.getPathToFile() + this.getDataDir();
+
+    window.resolveLocalFileSystemURL(pathToFile, function (directoryEntry) {
+        var succes = function() {
+            alert("Directory remove success");
+        }
+        var fails = function(error) {
+            alert("Directory remove fails " + error);
+        }
+        directoryEntry.remove(succes, fails);
+    });
+ }
+
+function writeToFile(fileName, data) {
+    var that = this;
+    data = JSON.stringify(data, null, '\t');
+
+    var pathToFile = this.getPathToFile() + this.getDataDir();
+
+    // TODO use externalRootDirectory 
+    window.resolveLocalFileSystemURL(pathToFile, function (directoryEntry) {
+        directoryEntry.getFile(fileName, { create: true }, function (fileEntry) {
+            fileEntry.createWriter(function (fileWriter) {
+                fileWriter.onwriteend = function (e) {
+                    // for real-world usage, you might consider passing a success callback
+                    console.log('Write of file "' + fileName + '"" completed.');
+                };
+
+                fileWriter.onerror = function (e) {
+                    // you could hook this up with our global error handler, or pass in an error callback
+                    console.log('Write failed: ' + e.toString());
+                };
+
+                var blob = new Blob([data], { type: 'text/plain' });
+                fileWriter.write(blob);
+            }, function(error) {
+                console.log("error1");
+            });
+        }, function(error) {
+            console.log("error2");
+        });
+    }, function(error) {
+        console.log("error3");
+    });
+}
+
+
+function readFromFile(fileName, cb) {
+    var that = this;
+
+    var pathToFile = this.getPathToFile() + this.getDataDir() + "/" + fileName;
+
     console.log("Path to file " + pathToFile);
     //alert("Filename " + pathToFile);
     // TODO examine how to configure path to file
@@ -56,12 +145,22 @@ function readFromFile(fileName, cb) {
     });
 }
 
- function onSubmit1() {
-    var fileName = 'data.json';
+function getFileName() {
+    return 'data.json';
+}
+
+function onReadFile1() {
     var fileData;
-    this.readFromFile(fileName, function (data) {
+    this.readFromFile(this.getFileName(), function (data) {
         fileData = data;
     });
+}
+
+function onWriteFile1() {
+    // Android file path: file:///storage/emulated/0/data.json (su root)
+    // IOS file path: 
+    var fileName = 'data.json';
+    this.writeToFile(this.getFileName(), { foo: 'bar' });
 }
 
 // Path to file not customizable
@@ -136,13 +235,6 @@ var app = {
         console.log('Received Event: ' + id);
 
         this.writeDataToFile();
-
-        // Android file path: file:///storage/emulated/0/data.json (su root)
-        // IOS file path: 
-        var fileName = 'data.json';
-        this.writeToFile(fileName, { foo: 'bar' });
-
-        
     },
 
     // Path to file not customizable
@@ -211,42 +303,6 @@ var app = {
         });
     },
 
-
-    // TODO investigate how to set other then cordova.file.dataDirectory
-    writeToFile: function(fileName, data) {
-        //alert("Write to file " + fileName);
-        var that = this;
-        data = JSON.stringify(data, null, '\t');
-
-        var pathToFile;
-        if (cordova.file.tempDirectory) {
-            // IOS
-            pathToFile = cordova.file.tempDirectory;
-        } else {
-            // Android
-            pathToFile = cordova.file.externalRootDirectory;
-        }
-    
-        // TODO use externalRootDirectory 
-        window.resolveLocalFileSystemURL(pathToFile, function (directoryEntry) {
-            directoryEntry.getFile(fileName, { create: true }, function (fileEntry) {
-                fileEntry.createWriter(function (fileWriter) {
-                    fileWriter.onwriteend = function (e) {
-                        // for real-world usage, you might consider passing a success callback
-                        console.log('Write of file "' + fileName + '"" completed.');
-                    };
-
-                    fileWriter.onerror = function (e) {
-                        // you could hook this up with our global error handler, or pass in an error callback
-                        console.log('Write failed: ' + e.toString());
-                    };
-
-                    var blob = new Blob([data], { type: 'text/plain' });
-                    fileWriter.write(blob);
-                }, that.errorHandler.bind(null, fileName));
-            }, that.errorHandler.bind(null, fileName));
-        }, that.errorHandler.bind(null, fileName));
-    },
 
     errorHandler: function (fileName, e) {  
         var msg = '';
