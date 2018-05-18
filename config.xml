@@ -24,6 +24,7 @@
         <allow-intent href="itms-apps:*" />
     </platform>
     <plugin name="cordova-plugin-file" spec="^6.0.1" />
+    <plugin name="cordova-plugin-background-fetch" spec="^5.4.0" />
     <engine name="android" spec="^7.0.0" />
     <engine name="ios" spec="~4.5.4" />
 </widget>
