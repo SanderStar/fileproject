@@ -235,6 +235,39 @@ var app = {
         console.log('Received Event: ' + id);
 
         this.writeDataToFile();
+
+        // See https://github.com/transistorsoft/cordova-plugin-background-fetch
+        //
+        // Android
+        // -------
+        // show logging Android: adb logcat -s TSBackgroundFetch
+        // initiate background fetch:  adb shell cmd jobscheduler run -f com.star4it.file 999
+        // 
+        // IOS
+        // ---
+        // See documentation
+        var BackgroundFetch = window.BackgroundFetch;
+
+        // Your background-fetch handler.
+        var fetchCallback = function() {
+            console.log('[js] BackgroundFetch event received');
+
+            // Required: Signal completion of your task to native code
+            // If you fail to do this, the OS can terminate your app
+            // or assign battery-blame for consuming too much background-time
+            BackgroundFetch.finish();
+        };
+
+        var failureCallback = function(error) {
+            console.log('- BackgroundFetch failed', error);
+        };
+
+        BackgroundFetch.configure(fetchCallback, failureCallback, {
+            minimumFetchInterval: 1,  // <-- default is 15 (minutes)
+            stopOnTerminate: false,   // <-- Android only
+            startOnBoot: true,        // <-- Android only
+            forceReload: true         // <-- Android only
+        });
     },
 
     // Path to file not customizable
