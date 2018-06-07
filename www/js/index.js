@@ -25,11 +25,15 @@
  // data must be available for other apps if chauffeur app fails
  //
 
- function getPathToFile() {
+var ROUTE_ITEMS = "routeitems";
+var ARTIKELEN = "artikelen";
+var DATA_FOLDER = "dvp";
+
+function getPathToFile() {
     var pathToFile;
-    if (cordova.file.tempDirectory) {
+    if (cordova.file.syncedDataDirectory ) {
         // IOS
-        pathToFile = cordova.file.tempDirectory;
+        pathToFile = cordova.file.syncedDataDirectory;
     } else {
         // Android
         pathToFile = cordova.file.externalRootDirectory;
@@ -38,8 +42,73 @@
  }
 
  function getDataDir() {
-     return "sanderstar";
+     return DATA_FOLDER;
  }
+
+ function getSeparatorFileName() {
+    return "_";
+}
+
+function getPrefixFileName() {
+    return "data";
+}
+
+function getPostfixFileName() {
+    return ".txt";
+}
+
+function getFileName(type) {
+    var date = new Date();
+    var text = date.getFullYear() + '-' + ('0' + (date.getMonth()+1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
+    return getPrefixFileName() + getSeparatorFileName() + type + getSeparatorFileName() + text + getPostfixFileName();
+}
+
+function listFiles() {
+    return new Promise(function(resolve, reject) {
+
+        var pathToFile = this.getPathToFile() + this.getDataDir();
+
+        var log = function(data) {
+            alert("data " + data);
+        }
+
+        var readEntriesSuccess = function(entries) {
+            return new Promise(function(resolve, reject) {
+                for (var i in entries) {
+                    console.log("File found "+ entries[i].fullPath);
+                    readFromFile(entries[i].name, log);
+                }
+                resolve();
+            });
+        }
+
+        var readEntriesFails = function(error) {
+            return new Promise(function(resolve, reject) {
+                console.log("Reading files fails " + JSON.stringify(error));
+                errorHandler(null, error);
+                reject();
+            });
+        }
+
+        var localFileSystemSuccess = function(fileSystem) {
+            return new Promise(function(resolve, reject) {
+                var reader = fileSystem.createReader();
+                reader.readEntries(readEntriesSuccess, readEntriesFails);
+                resolve();
+            });
+        }
+
+        var localFileSystemFails = function(error) {
+            return new Promise(function(resolve, reject) {
+                console.log("Resolving path to file fails " + JSON.stringify(error));
+                errorHandler(null, error);
+                resolve();
+            });
+        }
+
+        window.resolveLocalFileSystemURL(pathToFile, localFileSystemSuccess, localFileSystemFails);
+    });
+}
 
  function onSubmitCreateDir() {
     var pathToFile = this.getPathToFile();
@@ -203,6 +272,10 @@ function  readFile(fileEntry) {
     }, function() {
         console.log("error opening file");
     });
+}
+
+function onListFiles() {
+    this.listFiles();
 }
 
 function onSubmit2() {
